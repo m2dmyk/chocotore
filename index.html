@@ -1,0 +1,375 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#bfe9d8">
+<title>ちょこトレマップ</title>
+<style>
+:root{
+  --ink:#293957;--sub:#71809a;--sky:#bfe9f4;--mint:#ccebd9;--mint2:#84d4bb;
+  --yellow:#ffdc68;--pink:#f5b8c8;--lav:#c9c5ee;--cream:#fffdf8;--white:#fff;
+  --line:#dfe8ee;--shadow:0 7px 22px rgba(52,75,105,.11);
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:#edf5f6;color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif}
+button{font:inherit;color:inherit;border:0;cursor:pointer}
+.app{width:min(100%,440px);min-height:100vh;margin:auto;background:var(--cream);position:relative;overflow:hidden}
+.screen{display:none;min-height:100vh;padding-bottom:92px}.screen.active{display:block}
+.top{height:64px;padding:12px 18px;display:flex;align-items:center;justify-content:space-between;background:rgba(255,253,248,.96);position:sticky;top:0;z-index:30;border-bottom:1px solid #f0eee7}
+.title{font-weight:900;font-size:18px;letter-spacing:.02em}.back{background:none;font-size:34px;line-height:1;width:36px}.topRight{font-size:12px;color:var(--sub);font-weight:800}
+.bottom{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(100%,440px);height:82px;background:rgba(255,255,255,.96);backdrop-filter:blur(12px);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(4,1fr);z-index:50}
+.nav{background:none;color:#8a97aa;font-size:10px;font-weight:800}.nav b{display:block;font-size:25px;line-height:30px}.nav.active{color:#4c92b7}
+.content{padding:16px 18px}.center{text-align:center}
+.primary{width:100%;padding:15px 18px;border-radius:18px;background:var(--mint2);font-weight:900;box-shadow:0 4px 0 #61b49f}.primary:active{transform:translateY(2px);box-shadow:0 2px 0 #61b49f}
+.secondary{width:100%;padding:13px;border-radius:16px;background:#fff;border:1px solid var(--line);font-weight:800}
+.cat{object-fit:contain;display:block;width:auto;height:auto;max-width:100%;max-height:100%}.catSmall{width:auto;height:auto;max-width:44px;max-height:44px}.catMedium{width:auto;height:auto;max-width:72px;max-height:72px;margin:0 auto}.catBig{width:auto;height:auto;max-width:100px;max-height:100px;margin:0 auto}
+.bubble{display:inline-block;background:#fff;border:1px solid var(--line);border-radius:18px;padding:10px 14px;box-shadow:0 4px 12px rgba(52,75,105,.06);font-weight:800}
+.home{padding:14px 14px 0}
+.map{
+ height:auto;aspect-ratio:2/3;border-radius:28px;position:relative;overflow:hidden;box-shadow:var(--shadow);
+ background:#cfecc0 url("assets/area01.png") center/cover no-repeat;
+}
+.map:before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.02));pointer-events:none}
+.mapHeader{position:absolute;left:14px;right:14px;top:14px;display:flex;justify-content:space-between;align-items:flex-start;z-index:10;gap:8px}
+.logoPill,.stampPill{background:rgba(255,255,255,.94);border-radius:16px;padding:9px 12px;box-shadow:var(--shadow);font-weight:900}.logoPill{font-size:14px}.stampPill{font-size:12px;white-space:nowrap}
+.areaBadge{position:absolute;left:14px;top:66px;background:rgba(255,255,255,.92);border-radius:14px;padding:7px 11px;box-shadow:var(--shadow);font-size:12px;font-weight:900;z-index:10}
+.route{display:none}
+.node{position:absolute;width:48px;height:48px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.96);border:4px solid #d4dfe7;box-shadow:0 5px 12px rgba(52,75,105,.15);font-weight:900;font-size:16px;z-index:6;transition:.2s}
+.node.done{background:#ffdc68;border-color:#fff;color:#6b5a19}.node.current{background:#8ed7ea;color:#fff;border-color:#fff;transform:scale(1.12);animation:pulse 1.7s infinite}.node.locked{background:rgba(247,249,250,.94);color:#aeb9c5}.node.today{box-shadow:0 0 0 5px rgba(132,212,187,.28),0 5px 12px rgba(52,75,105,.15)}
+@keyframes pulse{50%{box-shadow:0 0 0 8px rgba(142,215,234,.2),0 5px 12px rgba(52,75,105,.15)}}
+/* AREA 1 points follow the illustrated road in assets/area01.png */
+.n1{left:18%;bottom:8%}.n2{left:32%;bottom:24%}.n3{left:54%;bottom:37%}.n4{left:70%;bottom:51%}.n5{left:61%;bottom:67%}.n6{left:80%;bottom:82%}
+.catHome{position:absolute;z-index:8;left:9%;top:23%;display:flex;align-items:center;gap:0;pointer-events:none}.catHome img{width:auto;height:auto;max-width:48px;max-height:48px;object-fit:contain;filter:none}.catHome img+img{margin-left:-4px}.stampSettings{display:flex;align-items:center;gap:8px}.stampSettingsBtn{width:32px;height:32px;border-radius:11px;background:#f3f7f8;box-shadow:0 2px 8px rgba(52,75,105,.08);font-size:16px}.customBox{margin:18px;background:#fff;border-radius:22px;padding:18px;box-shadow:var(--shadow)}.charSlot{border:1px solid var(--line);border-radius:18px;padding:12px;margin:10px 0;display:flex;align-items:center;gap:12px}.charPreview{width:auto;height:auto;max-width:64px;max-height:64px;object-fit:contain;display:block}.fileBtn{display:inline-block;padding:9px 12px;border-radius:13px;background:#eef5f7;font-size:12px;font-weight:900}.fileBtn input{display:none}.charSlot small{display:block;color:var(--sub);margin-top:4px}.dangerBtn{margin-top:8px;background:#fff1f2;color:#a85a67}
+.mapHint{position:absolute;bottom:12px;left:12px;right:12px;background:rgba(255,255,255,.94);border-radius:16px;padding:9px 12px;text-align:center;font-size:11px;font-weight:800;z-index:9}
+.areaClear{position:absolute;inset:0;background:rgba(255,253,248,.84);backdrop-filter:blur(2px);display:none;align-items:center;justify-content:center;z-index:20;padding:24px}.areaClear.show{display:flex}.areaClearCard{background:#fff;border-radius:24px;padding:24px 20px;text-align:center;box-shadow:var(--shadow);width:min(88%,320px)}.areaClearCard h2{margin:4px 0 8px;font-size:24px}.areaClearStars{font-size:25px;letter-spacing:3px;color:#d5a900;margin:8px 0 14px}.areaClearCard .cats{display:flex;justify-content:center;gap:0;margin-bottom:8px}.areaClearCard .cats img{width:auto;height:auto;max-width:64px;max-height:64px;object-fit:contain;display:block}
+.timeGrid{padding:18px;display:grid;grid-template-columns:1fr 1fr;gap:13px}.timeBtn{height:115px;border-radius:24px;background:#fff;box-shadow:var(--shadow);font-size:27px;font-weight:900}.timeBtn small{display:block;font-size:11px;margin-top:7px}.t10{background:#ffe0e8}.t15{background:#fff0b7}.t20{background:#d8eff8}.t30{background:#e3def8}
+.courseHero{padding:18px;text-align:center}.courseHero img{width:auto;height:auto;max-width:90px;max-height:90px;margin:0 auto;display:block;object-fit:contain}.courseTitle{font-size:25px;font-weight:900;margin:4px}.courseSub{color:var(--sub);font-size:12px;font-weight:800}
+.menuCard{background:#fff;border:1px solid var(--line);border-radius:18px;margin:9px 0;padding:12px;display:flex;align-items:center;gap:11px;box-shadow:0 4px 14px rgba(52,75,105,.05);transition:.2s}.menuCard.done{background:#f2fbf7;border-color:#aee3d3}.menuCard:active{transform:scale(.99)}
+.menuIcon{width:50px;height:50px;border-radius:15px;background:#eef5f7;display:grid;place-items:center;font-size:24px}.menuText{flex:1}.menuText b{display:block;font-size:14px}.menuText small{display:block;color:var(--sub);font-size:11px;margin-top:3px}.check{width:27px;height:27px;border-radius:50%;border:2px solid #bfccd8;background:#fff}.done .check{background:#67c9ad;border-color:#67c9ad;color:#fff}.done .check:after{content:"✓";display:grid;place-items:center;height:100%}
+.progressBar{height:9px;background:#edf1f4;border-radius:99px;overflow:hidden;margin:10px 0 15px}.progressBar i{display:block;height:100%;background:#75ceb4;width:0;transition:.25s}
+.treadmill{background:#eaf6f5;border-radius:22px;padding:16px;margin:12px 0}.setting{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #d6e7e4}.setting input{width:120px;border:1px solid #c8dedb;background:#fff;border-radius:12px;padding:9px 10px;text-align:right;font-weight:900;color:var(--ink)}.setting:last-child{border:0}.timer{font-size:40px;font-weight:900;text-align:center;padding:14px}
+.complete{padding:42px 24px;text-align:center}.complete h1{font-size:25px}.reward{width:150px;height:150px;margin:18px auto;border-radius:50%;background:#fff5c9;display:grid;place-items:center;box-shadow:0 12px 35px rgba(255,216,104,.3);animation:pop .65s both}.reward span{font-size:82px}.confetti{font-size:24px;letter-spacing:8px}.complete img{width:auto;height:auto;max-width:78px;max-height:78px;object-fit:contain;display:block;margin:0 auto}
+@keyframes pop{0%{transform:scale(.4);opacity:0}70%{transform:scale(1.08)}100%{transform:scale(1);opacity:1}}
+.monthCard{margin:14px 18px;padding:16px;background:#fff;border-radius:22px;box-shadow:var(--shadow)}.monthHeader{display:flex;justify-content:space-between;align-items:center}.monthHeader b{font-size:20px}.calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-top:15px;text-align:center}.calendar div{min-height:40px;display:grid;place-items:center;font-size:11px}.calendar .label{color:#94a0af;font-weight:900;min-height:25px}.calendar .stampDay{width:34px;height:34px;margin:auto;border-radius:50%;background:var(--yellow);font-weight:900;position:relative}.calendar .stampDay:after{content:"★";font-size:9px;position:absolute;right:-3px;top:-2px;color:#d9a700}.streak{display:flex;gap:6px;margin-top:14px}.streak span{flex:1;height:10px;border-radius:99px;background:#e8eef2}.streak span.on{background:#7ed1b8}
+.record{background:#fff;border-radius:19px;padding:16px;margin:10px 0;box-shadow:var(--shadow)}.recordTop{display:flex;justify-content:space-between}.record h2{margin:8px 0 0}.bar{height:8px;background:#e8eef3;border-radius:99px;overflow:hidden;margin-top:10px}.bar i{display:block;height:100%;background:#76cdb8;border-radius:99px}
+.monthMap{border-radius:24px;margin-top:14px;background:#f7fbfa;position:relative;overflow:hidden;box-shadow:var(--shadow);padding:14px}.areaProgress{display:grid;gap:10px}.areaRow{background:#fff;border:1px solid var(--line);border-radius:18px;padding:11px 12px}.areaRowTop{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}.areaRowTop b{font-size:13px}.areaRowTop small{color:var(--sub);font-weight:800}.areaDots{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}.areaDot{height:30px;border-radius:10px;background:#eef2f4;color:#aeb9c5;display:grid;place-items:center;font-size:12px;font-weight:900}.areaDot.done{background:var(--yellow);color:#6b5a19}.areaDot.current{background:#8ed7ea;color:#fff;box-shadow:0 0 0 3px rgba(142,215,234,.18)}.areaRow.clear{border-color:#b8e6d8;background:#f5fcf9}.areaRow.clear .areaRowTop b{color:#3f9c82}.areaRow.locked{opacity:.72}
+.toast{position:fixed;left:50%;bottom:95px;transform:translate(-50%,20px);background:#293957;color:#fff;padding:10px 15px;border-radius:999px;font-size:12px;font-weight:900;opacity:0;pointer-events:none;transition:.25s;z-index:100;white-space:nowrap}.toast.show{opacity:1;transform:translate(-50%,0)}
+@media(min-width:700px){body{padding:24px 0}.app{border-radius:30px;box-shadow:0 20px 60px rgba(52,75,105,.14)}}
+</style>
+</head>
+<body>
+<div class="app">
+
+<section id="home" class="screen active">
+  <div class="home">
+    <div class="map">
+      <div class="mapHeader"><div class="logoPill">🌱 ちょこトレマップ</div><div class="stampPill">⭐ <span id="homeStamp">0</span>/30</div></div>
+      <div class="areaBadge" id="areaBadge">AREA 1　はじまりの森</div>
+      <div class="catHome"><img data-char="1" src="assets/cat_lavender.png" alt="キャラクター1"><img data-char="2" src="assets/cat_dark.png" alt="キャラクター2"></div>
+      <div id="nodes"></div>
+      <div id="areaClear" class="areaClear"><div class="areaClearCard"><div class="cats"><img data-char="1" src="assets/cat_lavender.png"><img data-char="2" src="assets/cat_dark.png"></div><h2>AREA CLEAR!</h2><div class="areaClearStars">★ ★ ★ ★ ★ ★</div><p>はじまりの森を<br>コンプリートしました！</p><button class="primary" onclick="closeAreaClear()">OK</button></div></div>
+      <div class="mapHint">今日のトレーニングを完了すると、次のマスへ進めます ✨</div>
+    </div>
+    <div class="homeStats"><div class="stampSettings"><div><small>今月のスタンプ</small><b><span id="homeStamp2">0</span> 個</b></div><button class="stampSettingsBtn" onclick="show('customize')" aria-label="キャラクター設定">⚙️</button></div><button class="primary" style="width:auto;padding:11px 15px" onclick="show('time')">今日のトレーニング →</button></div>
+  </div>
+</section>
+
+<section id="customize" class="screen">
+  <div class="top"><button class="back" onclick="show('home')">‹</button><div class="title">キャラクター設定</div><span></span></div>
+  <div class="customBox">
+    <div class="center"><div class="bubble">好きな画像をアップロードして、マップのキャラクターにできます ✨</div></div>
+    <div class="charSlot"><img id="charPreview1" class="charPreview" src="assets/cat_lavender.png"><div style="flex:1"><b>キャラクター 1</b><small>透明背景の画像もそのまま使えます</small><label class="fileBtn">画像を選ぶ<input type="file" accept="image/*" onchange="uploadCharacter(1,this.files[0])"></label></div></div>
+    <div class="charSlot"><img id="charPreview2" class="charPreview" src="assets/cat_dark.png"><div style="flex:1"><b>キャラクター 2</b><small>好きな画像をもう1枚設定できます</small><label class="fileBtn">画像を選ぶ<input type="file" accept="image/*" onchange="uploadCharacter(2,this.files[0])"></label></div></div>
+    <button class="secondary dangerBtn" onclick="resetCharacters()">初期キャラクターに戻す</button>
+    <p style="font-size:11px;color:var(--sub);line-height:1.6;margin:12px 2px 0">画像はこのブラウザ内に保存されます。端末やブラウザを変えると設定は引き継がれません。</p>
+  </div>
+</section>
+
+<section id="time" class="screen">
+  <div class="top"><button class="back" onclick="show('home')">‹</button><div class="title">今日のトレーニング</div><span></span></div>
+  <div class="courseHero"><img data-char="1" src="assets/cat_lavender.png"><div class="courseTitle">今日はどれくらい？</div><div class="courseSub">時間を選ぶだけで、その日のメニューを自動で作ります</div></div>
+  <div class="timeGrid">
+    <button class="timeBtn t10" onclick="selectTime(10)">10分<small>🌱 ちょこっと</small></button>
+    <button class="timeBtn t15" onclick="selectTime(15)">15分<small>🌼 いつもの</small></button>
+    <button class="timeBtn t20" onclick="selectTime(20)">20分<small>🌳 しっかり</small></button>
+    <button class="timeBtn t30" onclick="selectTime(30)">30分<small>👑 余裕あり</small></button>
+  </div>
+  <div class="content"><button class="primary" onclick="selectTime(15)">✨ いつもの15分でスタート</button></div>
+</section>
+
+<section id="menu" class="screen">
+  <div class="top"><button class="back" onclick="show('time')">‹</button><div class="title"><span id="courseTitle">15分</span>コース</div><span class="topRight">今日のおすすめ</span></div>
+  <div class="content">
+    <div id="menuSummary"></div>
+    <div class="progressBar"><i id="menuProgress"></i></div>
+    <div id="menuList"></div>
+    <button class="primary" onclick="show('training')">▶ このメニューで始める</button>
+  </div>
+</section>
+
+<section id="training" class="screen">
+  <div class="top"><button class="back" onclick="show('menu')">‹</button><div class="title">トレーニング</div><div class="topRight" id="progress">0 / 0</div></div>
+  <div class="content"><div id="activeList"></div><br><button class="secondary" onclick="show('menu')">メニューを確認する</button></div>
+</section>
+
+<section id="tread" class="screen">
+  <div class="top"><button class="back" onclick="show('training')">‹</button><div class="title">トレッドミル</div><span></span></div>
+  <div class="content center">
+    <img class="catBig" data-char="2" src="assets/cat_dark.png">
+    <div class="bubble">無理に速くしなくてもOK。<br>フォームを保って、気持ちよく歩こう。</div>
+    <div class="treadmill">
+      <div class="setting"><span>速度</span><div><input id="treadSpeed" type="number" min="0.5" max="12" step="0.1" value="4.5" aria-label="速度 km/h"> km/h</div></div>
+      <div class="setting"><span>傾斜</span><div><input id="treadIncline" type="number" min="0" max="16" step="1" value="6" aria-label="傾斜 %"> %</div></div>
+      <div class="setting"><span>時間</span><b id="treadTime">15分</b></div>
+    </div>
+    <button class="primary" onclick="finishTread()">✓ トレッドミル終了</button>
+  </div>
+</section>
+
+<section id="complete" class="screen">
+  <div class="complete">
+    <img data-char="1" src="assets/cat_lavender.png">
+    <h1>今日のトレーニング<br>コンプリート！</h1>
+    <div class="confetti">✦　✧　✦　✧　✦</div>
+    <div class="reward"><span>⭐</span></div>
+    <h2 id="rewardTitle">スタンプを1個 GET!</h2>
+    <p id="rewardText">マップを1マス進みました。<br>今日もおつかれさま！</p>
+    <button class="primary" onclick="show('home')">マップへ戻る</button>
+  </div>
+</section>
+
+<section id="calendar" class="screen">
+  <div class="top"><div class="title">スタンプカレンダー</div><span class="topRight">今月</span></div>
+  <div class="monthCard">
+    <div class="monthHeader"><b id="monthTitle">2026年9月</b><span>⭐ <b id="calCount">0</b>個</span></div>
+    <div class="calendar" id="cal"></div>
+    <div class="streak" id="streak"></div>
+  </div>
+  <div class="content"><div class="bubble">続けた日が、マップの星になります ✨</div></div>
+</section>
+
+<section id="records" class="screen">
+  <div class="top"><div class="title">記録</div><span class="topRight">今月</span></div>
+  <div class="content">
+    <div class="record"><div class="recordTop"><b>🏋️ 筋トレ完了</b><b id="rStrength">0回</b></div><small>目標 12回</small><div class="bar"><i id="bStrength"></i></div></div>
+    <div class="record"><div class="recordTop"><b>👟 トレッドミル</b><b id="rTread">0分</b></div><small>目標 180分</small><div class="bar"><i id="bTread"></i></div></div>
+    <div class="record"><div class="recordTop"><b>⭐ スタンプ</b><b id="rStamp">0個</b></div><small>目標 12個</small><div class="bar"><i id="bStamp"></i></div></div>
+  </div>
+  <div class="content"><h3>今月のマップ</h3><div class="monthMap"><div id="recordNodes" class="areaProgress"></div></div></div>
+</section>
+
+<nav class="bottom">
+  <button class="nav active" data-screen="home" onclick="show('home')"><b>⌂</b>マップ</button>
+  <button class="nav" data-screen="time" onclick="show('time')"><b>♢</b>トレーニング</button>
+  <button class="nav" data-screen="calendar" onclick="show('calendar')"><b>□</b>スタンプ</button>
+  <button class="nav" data-screen="records" onclick="show('records')"><b>☆</b>記録</button>
+</nav>
+<div id="toast" class="toast"></div>
+</div>
+
+<script>
+const KEY='chokotoreMap_v2';
+const now=new Date();
+const ym=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+let state=JSON.parse(localStorage.getItem(KEY)||'null');
+if(!state || state.month!==ym){state={month:ym,stamps:0,dates:[],dailyStamps:{},strength:0,tread:0};save();}
+if(!state.dailyStamps) state.dailyStamps={};
+let selectedTime=15,menu=[],done=[],currentTread=-1;
+let viewArea=Number.isInteger(state.viewArea)?state.viewArea:Math.min(4,Math.floor(state.stamps/6));
+
+const base=[
+ {name:'レッグプレス',detail:'60kg × 20回 × 3セット',icon:'🦵',type:'strength'},
+ {name:'ショルダープレス',detail:'20kg × 20回 × 3セット',icon:'💪',type:'strength'},
+ {name:'チェストプレス',detail:'10kg × 15回 × 3セット',icon:'🏋️',type:'strength'},
+ {name:'トレッドミル',detail:'4.5km/h・傾斜6%・15分',icon:'👟',type:'tread'}
+];
+
+function save(){localStorage.setItem(KEY,JSON.stringify(state));updateStats();}
+function show(id){
+ document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+ document.getElementById(id).classList.add('active');
+ document.querySelectorAll('.nav').forEach(n=>n.classList.toggle('active',n.dataset.screen===id));
+ updateStats(); window.scrollTo(0,0);
+}
+function selectTime(min){
+ selectedTime=min;
+ menu=base.map(x=>({...x}));
+ if(min===10) menu=[base[0],base[2],{...base[3],detail:'4.5km/h・傾斜6%・10分'}];
+ if(min===20){menu=[...base.map(x=>({...x}))];menu[3].detail='4.5km/h・傾斜6%・20分';}
+ if(min===30){menu=[...base.map(x=>({...x})),{name:'アブベンチ',detail:'10〜15回 × 2セット',icon:'✨',type:'strength'}];menu[3].detail='4.5km/h・傾斜6%・20分';}
+ done=Array(menu.length).fill(false);
+ document.getElementById('courseTitle').textContent=min+'分';
+ document.getElementById('treadTime').textContent=(min===30?20:min)+'分';
+ const sp=document.getElementById('treadSpeed'), inc=document.getElementById('treadIncline'); if(sp)sp.value=4.5; if(inc)inc.value=6;
+ renderMenu();renderActive();applyCharacters();show('menu');
+}
+function renderMenu(){
+ const count=menu.length;
+ document.getElementById('menuSummary').innerHTML=`<div class="courseHero" style="padding:4px 0 12px"><img class="catMedium" data-char="1" src="assets/cat_lavender.png"><div class="courseSub">約${selectedTime}分 / ${count}メニュー。全部終わるとスタンプを獲得！</div></div>`; applyCharacters();
+ document.getElementById('menuList').innerHTML=menu.map((m,i)=>`<div class="menuCard"><div class="menuIcon">${m.icon}</div><div class="menuText"><b>${m.name}</b><small>${m.detail}</small></div><span>○</span></div>`).join('');
+ updateProgress();
+}
+function renderActive(){
+ document.getElementById('progress').textContent=done.filter(Boolean).length+' / '+menu.length;
+ document.getElementById('activeList').innerHTML=menu.map((m,i)=>`<button class="menuCard ${done[i]?'done':''}" style="width:100%;text-align:left" onclick="tapItem(${i})"><div class="menuIcon">${m.icon}</div><div class="menuText"><b>${m.name}</b><small>${m.detail}</small></div><span class="check"></span></button>`).join('');
+ updateProgress();
+}
+function updateProgress(){
+ const n=done.filter(Boolean).length, p=menu.length?Math.round(n/menu.length*100):0;
+ const bar=document.getElementById('menuProgress');if(bar)bar.style.width=p+'%';
+}
+function tapItem(i){
+ if(done[i])return;
+ if(menu[i].type==='tread'){currentTread=i;show('tread');return;}
+ finishIndex(i);
+ show('training');
+}
+function finishTread(){
+ const speed=parseFloat(document.getElementById('treadSpeed')?.value)||4.5;
+ const incline=parseFloat(document.getElementById('treadIncline')?.value)||0;
+ if(speed<0.5||speed>12||incline<0||incline>16){toast('速度は0.5〜12、傾斜は0〜16で入力してください');return;}
+ if(currentTread>=0 && menu[currentTread]) menu[currentTread].detail=`${speed.toFixed(1)}km/h・傾斜${Number.isInteger(incline)?incline:incline.toFixed(1)}%・${selectedTime===30?20:selectedTime}分`;
+ finishIndex(currentTread);show('training');
+}
+function finishIndex(i){
+ if(i<0||done[i])return;
+ done[i]=true;
+ if(menu[i].type==='strength') state._sessionStrength=(state._sessionStrength||0)+1;
+ if(menu[i].type==='tread') state._sessionTread=(state._sessionTread||0)+selectedTime;
+ renderActive();
+ if(done.every(Boolean))complete();
+}
+function complete(){
+ const today=new Date().toISOString().slice(0,10);
+ if(!state.dates.includes(today)) state.dates.push(today);
+ state.dailyStamps[today]=(state.dailyStamps[today]||0)+1;
+ state.stamps++;
+ state.strength++;state.tread+=selectedTime;
+ state._sessionStrength=0;state._sessionTread=0;
+ viewArea=Math.min(4,Math.floor((state.stamps-1)/6));
+ state.viewArea=viewArea;
+ save();
+ const n=state.dailyStamps[today];
+ document.getElementById('rewardTitle').textContent='スタンプを1個 GET!';
+ document.getElementById('rewardText').innerHTML=`今日${n}回目のトレーニング達成！<br>マップを1マス進みました。${n>1?`<br>今日はスタンプを${n}個獲得しています ✨`:''}`;
+ show('complete');toast('⭐ スタンプを1個獲得しました！');
+}
+
+const DEFAULT_CHARS=['assets/cat_lavender.png','assets/cat_dark.png'];
+let customChars=[localStorage.getItem('chokotoreChar1')||DEFAULT_CHARS[0],localStorage.getItem('chokotoreChar2')||DEFAULT_CHARS[1]];
+function applyCharacters(){
+ document.querySelectorAll('[data-char="1"]').forEach(i=>i.src=customChars[0]);
+ document.querySelectorAll('[data-char="2"]').forEach(i=>i.src=customChars[1]);
+ const p1=document.getElementById('charPreview1'),p2=document.getElementById('charPreview2');
+ if(p1)p1.src=customChars[0]; if(p2)p2.src=customChars[1];
+}
+function uploadCharacter(slot,file){
+ if(!file)return;
+ const reader=new FileReader();
+ reader.onload=()=>{
+   const data=reader.result;
+   customChars[slot-1]=data;
+   try{ localStorage.setItem('chokotoreChar'+slot,data); }catch(e){ toast('画像が大きすぎるため保存できませんでした'); return; }
+   applyCharacters();
+   toast('キャラクターを変更しました！');
+ };
+ reader.readAsDataURL(file);
+}
+function resetCharacters(){
+ customChars=[...DEFAULT_CHARS]; localStorage.removeItem('chokotoreChar1');localStorage.removeItem('chokotoreChar2');applyCharacters();toast('初期キャラクターに戻しました');
+}
+
+function updateStats(){
+ document.getElementById('homeStamp').textContent=state.stamps;
+ document.getElementById('homeStamp2').textContent=state.stamps;
+ document.getElementById('calCount').textContent=state.stamps;
+ document.getElementById('rStrength').textContent=state.strength+'回';
+ document.getElementById('rTread').textContent=state.tread+'分';
+ document.getElementById('rStamp').textContent=state.stamps+'個';
+ document.getElementById('bStrength').style.width=Math.min(100,state.strength/12*100)+'%';
+ document.getElementById('bTread').style.width=Math.min(100,state.tread/180*100)+'%';
+ document.getElementById('bStamp').style.width=Math.min(100,state.stamps/12*100)+'%';
+ renderNodes();syncAreaView();buildCal();
+}
+function areaInfo(){
+ const names=['はじまりの森','AREA 2','AREA 3','AREA 4','AREA 5'];
+ const backgrounds=['assets/area01.png','assets/area01.png','assets/area01.png','assets/area01.png','assets/area01.png'];
+ return {name:names[viewArea]||names[0],background:backgrounds[viewArea]||backgrounds[0]};
+}
+function syncAreaView(){
+ const info=areaInfo();
+ const map=document.querySelector('.map');
+ if(map)map.style.backgroundImage=`url("${info.background}")`;
+ const badge=document.getElementById('areaBadge');
+ if(badge)badge.textContent=`AREA ${viewArea+1}　${info.name}`;
+}
+
+function renderNodes(){
+ const total=Math.min(state.stamps,30);
+ const unlockedArea=Math.min(4,Math.floor(total/6));
+ const areaStart=unlockedArea*6;
+ const areaCount=Math.max(0,Math.min(6,total-areaStart));
+ const host=document.getElementById('nodes');
+ if(host){
+   let out='';
+   for(let i=1;i<=6;i++){
+     let cls='node n'+i;
+     if(i<=areaCount)cls+=' done';
+     if(i===areaCount+1 && i<=6)cls+=' current today';
+     if(i>areaCount+1)cls+=' locked';
+     out+=`<div class="${cls}" title="AREA ${viewArea+1} ${i}/6">${i<=areaCount?'★':i}</div>`;
+   }
+   host.innerHTML=out;
+ }
+ const clear=document.getElementById('areaClear');
+ if(clear)clear.classList.toggle('show',areaCount>=6 && viewArea<4);
+ const rh=document.getElementById('recordNodes');
+ if(rh){
+   const areaNames=['はじまりの森','AREA 2','AREA 3','AREA 4','AREA 5'];
+   const total=Math.min(state.stamps,30);
+   let out='';
+   for(let a=0;a<5;a++){
+     const start=a*6;
+     const count=Math.max(0,Math.min(6,total-start));
+     const clear=count>=6;
+     const locked=a>0 && total<start;
+     out+=`<div class="areaRow ${clear?'clear':''} ${locked?'locked':''}">
+       <div class="areaRowTop"><b>AREA ${a+1}　${areaNames[a]}</b><small>${count}/6${clear?'　CLEAR!':''}</small></div>
+       <div class="areaDots">${Array.from({length:6},(_,i)=>{
+         const n=i+1;
+         const doneDot=i<count;
+         const current=!doneDot && i===count && !locked;
+         return `<span class="areaDot ${doneDot?'done':''} ${current?'current':''}">${doneDot?'★':n}</span>`;
+       }).join('')}</div>
+     </div>`;
+   }
+   rh.innerHTML=out;
+ }
+}
+function closeAreaClear(){
+ const clear=document.getElementById('areaClear');
+ if(viewArea<4 && Math.min(state.stamps,30)>=(viewArea+1)*6){
+   viewArea++; state.viewArea=viewArea; save();
+ }
+ clear?.classList.remove('show'); syncAreaView(); renderNodes(); toast(`AREA ${viewArea+1}へ進みました！`);
+}
+function buildCal(){
+ const el=document.getElementById('cal');if(!el)return;
+ const year=now.getFullYear(),month=now.getMonth();
+ document.getElementById('monthTitle').textContent=year+'年'+(month+1)+'月';
+ const labels=['日','月','火','水','木','金','土'];let out=labels.map(x=>`<div class="label">${x}</div>`).join('');
+ const first=new Date(year,month,1).getDay(),days=new Date(year,month+1,0).getDate();
+ for(let i=0;i<first;i++)out+='<div></div>';
+ for(let d=1;d<=days;d++){
+  const key=`${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+  const dayCount=state.dailyStamps[key]||0; out+=`<div>${dayCount?`<span class="stampDay" title="${dayCount}回達成">${d}<small style="position:absolute;right:-4px;bottom:-3px;background:#7ed1b8;color:#fff;border-radius:9px;padding:1px 4px;font-size:8px">${dayCount}</small></span>`:d}</div>`;
+ }
+ el.innerHTML=out;
+ const s=document.getElementById('streak');s.innerHTML=Array.from({length:7},(_,i)=>`<span class="${i<Math.min(7,state.stamps)?'on':''}"></span>`).join('');
+}
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200)}
+updateStats();selectTime(15);applyCharacters();
+</script>
+</body>
+</html>
