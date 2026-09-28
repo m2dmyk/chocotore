@@ -40,7 +40,9 @@ button{font:inherit;color:inherit;border:0;cursor:pointer}
 @keyframes pulse{50%{box-shadow:0 0 0 8px rgba(142,215,234,.2),0 5px 12px rgba(52,75,105,.15)}}
 /* AREA 1 points follow the illustrated road in assets/area01.png */
 .n1{left:18%;bottom:8%}.n2{left:32%;bottom:24%}.n3{left:54%;bottom:37%}.n4{left:70%;bottom:51%}.n5{left:61%;bottom:67%}.n6{left:80%;bottom:82%}
-.catHome{position:absolute;z-index:8;left:9%;top:23%;display:flex;align-items:center;gap:0;pointer-events:none}.catHome img{width:auto;height:auto;max-width:48px;max-height:48px;object-fit:contain;filter:none}.catHome img+img{margin-left:-4px}.stampSettings{display:flex;align-items:center;gap:8px}.stampSettingsBtn{width:32px;height:32px;border-radius:11px;background:#f3f7f8;box-shadow:0 2px 8px rgba(52,75,105,.08);font-size:16px}.customBox{margin:18px;background:#fff;border-radius:22px;padding:18px;box-shadow:var(--shadow)}.charSlot{border:1px solid var(--line);border-radius:18px;padding:12px;margin:10px 0;display:flex;align-items:center;gap:12px}.charPreview{width:auto;height:auto;max-width:64px;max-height:64px;object-fit:contain;display:block}.fileBtn{display:inline-block;padding:9px 12px;border-radius:13px;background:#eef5f7;font-size:12px;font-weight:900}.fileBtn input{display:none}.charSlot small{display:block;color:var(--sub);margin-top:4px}.dangerBtn{margin-top:8px;background:#fff1f2;color:#a85a67}
+/* AREA 2 points follow the illustrated road in assets/area02.png */
+.map.area2 .n1{left:14%;bottom:7%}.map.area2 .n2{left:35%;bottom:24%}.map.area2 .n3{left:53%;bottom:39%}.map.area2 .n4{left:42%;bottom:54%}.map.area2 .n5{left:63%;bottom:69%}.map.area2 .n6{left:76%;bottom:83%}
+.catHome{position:absolute;inset:0;z-index:8;pointer-events:none}.mapChar{position:absolute;width:auto;height:auto;max-width:none;max-height:none;object-fit:contain;transform-origin:center center;touch-action:none;user-select:none;-webkit-user-drag:none;pointer-events:none;will-change:transform,left,top}.map.charEditMode .mapChar{pointer-events:auto;cursor:grab}.map.charEditMode .mapChar:active{cursor:grabbing}.charEditBar{position:absolute;left:12px;right:12px;bottom:58px;z-index:25;display:none;background:rgba(255,255,255,.96);border-radius:18px;padding:9px 10px;box-shadow:var(--shadow);align-items:center;gap:8px}.map.charEditMode .charEditBar{display:flex}.charEditText{flex:1;font-size:10px;font-weight:900;line-height:1.35}.charEditDone{background:var(--mint2);padding:9px 12px;border-radius:13px;font-weight:900;white-space:nowrap}.map.charEditMode .mapHint{display:none}.stampSettings{display:flex;align-items:center;gap:8px}.stampSettingsBtn{width:32px;height:32px;border-radius:11px;background:#f3f7f8;box-shadow:0 2px 8px rgba(52,75,105,.08);font-size:16px}.customBox{margin:18px;background:#fff;border-radius:22px;padding:18px;box-shadow:var(--shadow)}.charSlot{border:1px solid var(--line);border-radius:18px;padding:12px;margin:10px 0;display:flex;align-items:center;gap:12px}.charPreview{width:auto;height:auto;max-width:64px;max-height:64px;object-fit:contain;display:block}.fileBtn{display:inline-block;padding:9px 12px;border-radius:13px;background:#eef5f7;font-size:12px;font-weight:900}.fileBtn input{display:none}.charSlot small{display:block;color:var(--sub);margin-top:4px}.dangerBtn{margin-top:8px;background:#fff1f2;color:#a85a67}
 .mapHint{position:absolute;bottom:12px;left:12px;right:12px;background:rgba(255,255,255,.94);border-radius:16px;padding:9px 12px;text-align:center;font-size:11px;font-weight:800;z-index:9}
 .areaClear{position:absolute;inset:0;background:rgba(255,253,248,.84);backdrop-filter:blur(2px);display:none;align-items:center;justify-content:center;z-index:20;padding:24px}.areaClear.show{display:flex}.areaClearCard{background:#fff;border-radius:24px;padding:24px 20px;text-align:center;box-shadow:var(--shadow);width:min(88%,320px)}.areaClearCard h2{margin:4px 0 8px;font-size:24px}.areaClearStars{font-size:25px;letter-spacing:3px;color:#d5a900;margin:8px 0 14px}.areaClearCard .cats{display:flex;justify-content:center;gap:0;margin-bottom:8px}.areaClearCard .cats img{width:auto;height:auto;max-width:64px;max-height:64px;object-fit:contain;display:block}
 .timeGrid{padding:18px;display:grid;grid-template-columns:1fr 1fr;gap:13px}.timeBtn{height:115px;border-radius:24px;background:#fff;box-shadow:var(--shadow);font-size:27px;font-weight:900}.timeBtn small{display:block;font-size:11px;margin-top:7px}.t10{background:#ffe0e8}.t15{background:#fff0b7}.t20{background:#d8eff8}.t30{background:#e3def8}
@@ -66,10 +68,10 @@ button{font:inherit;color:inherit;border:0;cursor:pointer}
     <div class="map">
       <div class="mapHeader"><div class="logoPill">🌱 ちょこトレマップ</div><div class="stampPill">⭐ <span id="homeStamp">0</span>/30</div></div>
       <div class="areaBadge" id="areaBadge">AREA 1　はじまりの森</div>
-      <div class="catHome"><img data-char="1" src="assets/cat_lavender.png" alt="キャラクター1"><img data-char="2" src="assets/cat_dark.png" alt="キャラクター2"></div>
+      <div class="catHome"><img class="mapChar" data-char="1" src="assets/cat_lavender.png" alt="キャラクター1"><img class="mapChar" data-char="2" src="assets/cat_dark.png" alt="キャラクター2"></div>
       <div id="nodes"></div>
-      <div id="areaClear" class="areaClear"><div class="areaClearCard"><div class="cats"><img data-char="1" src="assets/cat_lavender.png"><img data-char="2" src="assets/cat_dark.png"></div><h2>AREA CLEAR!</h2><div class="areaClearStars">★ ★ ★ ★ ★ ★</div><p>はじまりの森を<br>コンプリートしました！</p><button class="primary" onclick="closeAreaClear()">OK</button></div></div>
-      <div class="mapHint">今日のトレーニングを完了すると、次のマスへ進めます ✨</div>
+      <div id="areaClear" class="areaClear"><div class="areaClearCard"><div class="cats"><img data-char="1" src="assets/cat_lavender.png"><img data-char="2" src="assets/cat_dark.png"></div><h2>AREA CLEAR!</h2><div class="areaClearStars">★ ★ ★ ★ ★ ★</div><p><span id="clearAreaName">はじまりの森</span>を<br>コンプリートしました！</p><button class="primary" onclick="closeAreaClear()">次のエリアへ</button></div></div>
+      <div class="charEditBar"><div class="charEditText">キャラクターを指で移動<br>2本指で大きさを変更できます</div><button class="charEditDone" onclick="finishCharacterEdit()">完了</button></div><div class="mapHint">今日のトレーニングを完了すると、次のマスへ進めます ✨</div>
     </div>
     <div class="homeStats"><div class="stampSettings"><div><small>今月のスタンプ</small><b><span id="homeStamp2">0</span> 個</b></div><button class="stampSettingsBtn" onclick="show('customize')" aria-label="キャラクター設定">⚙️</button></div><button class="primary" style="width:auto;padding:11px 15px" onclick="show('time')">今日のトレーニング →</button></div>
   </div>
@@ -81,7 +83,7 @@ button{font:inherit;color:inherit;border:0;cursor:pointer}
     <div class="center"><div class="bubble">好きな画像をアップロードして、マップのキャラクターにできます ✨</div></div>
     <div class="charSlot"><img id="charPreview1" class="charPreview" src="assets/cat_lavender.png"><div style="flex:1"><b>キャラクター 1</b><small>透明背景の画像もそのまま使えます</small><label class="fileBtn">画像を選ぶ<input type="file" accept="image/*" onchange="uploadCharacter(1,this.files[0])"></label></div></div>
     <div class="charSlot"><img id="charPreview2" class="charPreview" src="assets/cat_dark.png"><div style="flex:1"><b>キャラクター 2</b><small>好きな画像をもう1枚設定できます</small><label class="fileBtn">画像を選ぶ<input type="file" accept="image/*" onchange="uploadCharacter(2,this.files[0])"></label></div></div>
-    <button class="secondary dangerBtn" onclick="resetCharacters()">初期キャラクターに戻す</button>
+    <button class="primary" style="margin-top:12px" onclick="startCharacterEdit()">MAP上で配置を調整</button><button class="secondary dangerBtn" onclick="resetCharacters()">初期キャラクターに戻す</button>
     <p style="font-size:11px;color:var(--sub);line-height:1.6;margin:12px 2px 0">画像はこのブラウザ内に保存されます。端末やブラウザを変えると設定は引き継がれません。</p>
   </div>
 </section>
@@ -258,11 +260,88 @@ function complete(){
 
 const DEFAULT_CHARS=['assets/cat_lavender.png','assets/cat_dark.png'];
 let customChars=[localStorage.getItem('chokotoreChar1')||DEFAULT_CHARS[0],localStorage.getItem('chokotoreChar2')||DEFAULT_CHARS[1]];
+const CHAR_LAYOUT_KEY='chokotoreCharLayouts';
+let charLayouts={};
+try{charLayouts=JSON.parse(localStorage.getItem(CHAR_LAYOUT_KEY)||'{}')||{};}catch(e){charLayouts={};}
+function defaultCharLayout(slot){
+ return slot===1?{x:14,y:24,scale:1}:{x:22,y:24,scale:1};
+}
+function getCharLayout(area,slot){
+ const a=charLayouts[area]||{};
+ return {...defaultCharLayout(slot),...(a[slot]||{})};
+}
+function saveCharLayouts(){try{localStorage.setItem(CHAR_LAYOUT_KEY,JSON.stringify(charLayouts));}catch(e){toast('配置を保存できませんでした');}}
+function renderCharacterLayout(){
+ const map=document.querySelector('.map');
+ if(!map)return;
+ document.querySelectorAll('.mapChar').forEach(img=>{
+   const slot=Number(img.dataset.char), l=getCharLayout(viewArea,slot);
+   img.style.left=l.x+'%'; img.style.top=l.y+'%'; img.style.width=(48*l.scale)+'px';
+   img.style.height='auto'; img.style.transform='translate(-50%,-50%)';
+ });
+}
 function applyCharacters(){
  document.querySelectorAll('[data-char="1"]').forEach(i=>i.src=customChars[0]);
  document.querySelectorAll('[data-char="2"]').forEach(i=>i.src=customChars[1]);
  const p1=document.getElementById('charPreview1'),p2=document.getElementById('charPreview2');
  if(p1)p1.src=customChars[0]; if(p2)p2.src=customChars[1];
+ renderCharacterLayout();
+}
+function startCharacterEdit(){
+ show('home');
+ const map=document.querySelector('.map');
+ map?.classList.add('charEditMode');
+ toast(`AREA ${viewArea+1}の配置を調整できます`);
+}
+function finishCharacterEdit(){
+ document.querySelector('.map')?.classList.remove('charEditMode');
+ saveCharLayouts();
+ toast('キャラクターの配置を保存しました！');
+}
+
+let activeCharPointers=new Map(), pinchState=null;
+function setupCharacterGestures(){
+ document.querySelectorAll('.mapChar').forEach(el=>{
+   el.addEventListener('pointerdown',e=>{
+     if(!document.querySelector('.map')?.classList.contains('charEditMode'))return;
+     e.preventDefault();
+     const slot=Number(el.dataset.char);
+     el.setPointerCapture?.(e.pointerId);
+     activeCharPointers.set(e.pointerId,{x:e.clientX,y:e.clientY,slot});
+     const same=[...activeCharPointers.values()].filter(p=>p.slot===slot);
+     const l=getCharLayout(viewArea,slot);
+     if(same.length===1){
+       pinchState=null;
+       el._drag={slot,startX:e.clientX,startY:e.clientY,startLayout:{...l}};
+     }else if(same.length>=2){
+       const pts=same.slice(0,2),dx=pts[0].x-pts[1].x,dy=pts[0].y-pts[1].y;
+       pinchState={slot,distance:Math.hypot(dx,dy),scale:l.scale};
+       el._drag=null;
+     }
+   },{passive:false});
+   el.addEventListener('pointermove',e=>{
+     if(!document.querySelector('.map')?.classList.contains('charEditMode'))return;
+     if(!activeCharPointers.has(e.pointerId))return;
+     e.preventDefault();
+     const slot=Number(el.dataset.char); activeCharPointers.set(e.pointerId,{x:e.clientX,y:e.clientY,slot});
+     const same=[...activeCharPointers.entries()].filter(([,p])=>p.slot===slot).map(([,p])=>p);
+     const l=getCharLayout(viewArea,slot), rect=el.parentElement.parentElement.getBoundingClientRect();
+     if(same.length>=2 && pinchState?.slot===slot){
+       const dx=same[0].x-same[1].x,dy=same[0].y-same[1].y;
+       const distance=Math.hypot(dx,dy);
+       l.scale=Math.max(.45,Math.min(3,pinchState.scale*(distance/Math.max(1,pinchState.distance))));
+       charLayouts[viewArea]??={}; charLayouts[viewArea][slot]=l;
+       el.style.width=(48*l.scale)+'px';
+     }else if(el._drag && same.length===1){
+       l.x=Math.max(5,Math.min(95,el._drag.startLayout.x+(e.clientX-el._drag.startX)/rect.width*100));
+       l.y=Math.max(7,Math.min(90,el._drag.startLayout.y+(e.clientY-el._drag.startY)/rect.height*100));
+       charLayouts[viewArea]??={}; charLayouts[viewArea][slot]=l;
+       el.style.left=l.x+'%'; el.style.top=l.y+'%';
+     }
+   },{passive:false});
+   const end=e=>{activeCharPointers.delete(e.pointerId); if(activeCharPointers.size<2)pinchState=null; el._drag=null;};
+   el.addEventListener('pointerup',end); el.addEventListener('pointercancel',end);
+ });
 }
 function uploadCharacter(slot,file){
  if(!file)return;
@@ -293,16 +372,22 @@ function updateStats(){
  renderNodes();syncAreaView();buildCal();
 }
 function areaInfo(){
- const names=['はじまりの森','AREA 2','AREA 3','AREA 4','AREA 5'];
- const backgrounds=['assets/area01.png','assets/area01.png','assets/area01.png','assets/area01.png','assets/area01.png'];
+ const names=['はじまりの森','学校','喫茶店','野球場','海'];
+ const backgrounds=['assets/area01.png','assets/area02.png','assets/area03.png','assets/area04.png','assets/area05.png'];
  return {name:names[viewArea]||names[0],background:backgrounds[viewArea]||backgrounds[0]};
 }
 function syncAreaView(){
  const info=areaInfo();
  const map=document.querySelector('.map');
- if(map)map.style.backgroundImage=`url("${info.background}")`;
+ if(map){
+   map.style.backgroundImage=`url("${info.background}")`;
+   map.classList.toggle('area2',viewArea===1);
+   renderCharacterLayout();
+ }
  const badge=document.getElementById('areaBadge');
  if(badge)badge.textContent=`AREA ${viewArea+1}　${info.name}`;
+ const clearName=document.getElementById('clearAreaName');
+ if(clearName)clearName.textContent=info.name;
 }
 
 function renderNodes(){
@@ -326,7 +411,7 @@ function renderNodes(){
  if(clear)clear.classList.toggle('show',areaCount>=6 && viewArea<4);
  const rh=document.getElementById('recordNodes');
  if(rh){
-   const areaNames=['はじまりの森','AREA 2','AREA 3','AREA 4','AREA 5'];
+   const areaNames=['はじまりの森','学校','喫茶店','野球場','海'];
    const total=Math.min(state.stamps,30);
    let out='';
    for(let a=0;a<5;a++){
@@ -369,7 +454,7 @@ function buildCal(){
  const s=document.getElementById('streak');s.innerHTML=Array.from({length:7},(_,i)=>`<span class="${i<Math.min(7,state.stamps)?'on':''}"></span>`).join('');
 }
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200)}
-updateStats();selectTime(15);applyCharacters();
+updateStats();selectTime(15);applyCharacters();setupCharacterGestures();
 </script>
 </body>
 </html>
