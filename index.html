@@ -58,6 +58,10 @@ button{font:inherit;color:inherit;border:0;cursor:pointer}
 .monthMap{border-radius:24px;margin-top:14px;background:#f7fbfa;position:relative;overflow:hidden;box-shadow:var(--shadow);padding:14px}.areaProgress{display:grid;gap:10px}.areaRow{background:#fff;border:1px solid var(--line);border-radius:18px;padding:11px 12px}.areaRowTop{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}.areaRowTop b{font-size:13px}.areaRowTop small{color:var(--sub);font-weight:800}.areaDots{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}.areaDot{height:30px;border-radius:10px;background:#eef2f4;color:#aeb9c5;display:grid;place-items:center;font-size:12px;font-weight:900}.areaDot.done{background:var(--yellow);color:#6b5a19}.areaDot.current{background:#8ed7ea;color:#fff;box-shadow:0 0 0 3px rgba(142,215,234,.18)}.areaRow.clear{border-color:#b8e6d8;background:#f5fcf9}.areaRow.clear .areaRowTop b{color:#3f9c82}.areaRow.locked{opacity:.72}
 .toast{position:fixed;left:50%;bottom:95px;transform:translate(-50%,20px);background:#293957;color:#fff;padding:10px 15px;border-radius:999px;font-size:12px;font-weight:900;opacity:0;pointer-events:none;transition:.25s;z-index:100;white-space:nowrap}.toast.show{opacity:1;transform:translate(-50%,0)}
 @media(min-width:700px){body{padding:24px 0}.app{border-radius:30px;box-shadow:0 20px 60px rgba(52,75,105,.14)}}
+
+.timeGrid .t0{border-color:#9cc8b4;background:#f3fbf6}.timeGrid .t0 small{color:#4d8b6d}
+.stepCard{width:min(100%,360px);margin:16px auto 0;padding:20px;border:1px solid var(--line);border-radius:22px;background:#fff;box-shadow:0 8px 24px rgba(50,70,60,.06)}
+.stepLabel{font-size:12px;font-weight:900;color:var(--sub);text-align:left;margin-bottom:7px}.stepGoalLabel{margin-top:16px}.stepInputRow{display:flex;align-items:center;gap:8px}.stepInputRow input{flex:1;width:100%;box-sizing:border-box;border:2px solid #dcebe2;border-radius:14px;padding:12px 14px;font-size:22px;font-weight:900;text-align:right;background:#fbfefc}.stepInputRow span{font-weight:900;color:var(--sub)}.stepStatus{margin:16px 0;padding:12px;border-radius:14px;background:#f4f8f5;font-size:13px;font-weight:800;line-height:1.6}.stepNote{max-width:360px;margin:12px auto 0;color:var(--sub);font-size:10px;line-height:1.6}
 </style>
 </head>
 <body>
@@ -92,12 +96,30 @@ button{font:inherit;color:inherit;border:0;cursor:pointer}
   <div class="top"><button class="back" onclick="show('home')">‹</button><div class="title">今日のトレーニング</div><span></span></div>
   <div class="courseHero"><img data-char="1" src="assets/cat_lavender.png"><div class="courseTitle">今日はどれくらい？</div><div class="courseSub">時間を選ぶだけで、その日のメニューを自動で作ります</div></div>
   <div class="timeGrid">
+    <button class="timeBtn t0" onclick="selectTime(0)">0分<small>🚶 歩数チャレンジ</small></button>
     <button class="timeBtn t10" onclick="selectTime(10)">10分<small>🌱 ちょこっと</small></button>
     <button class="timeBtn t15" onclick="selectTime(15)">15分<small>🌼 いつもの</small></button>
     <button class="timeBtn t20" onclick="selectTime(20)">20分<small>🌳 しっかり</small></button>
     <button class="timeBtn t30" onclick="selectTime(30)">30分<small>👑 余裕あり</small></button>
   </div>
   <div class="content"><button class="primary" onclick="selectTime(15)">✨ いつもの15分でスタート</button></div>
+</section>
+
+<section id="steps" class="screen">
+  <div class="top"><button class="back" onclick="show('time')">‹</button><div class="title">歩数チャレンジ</div><span></span></div>
+  <div class="content center">
+    <img class="catBig" data-char="1" src="assets/cat_lavender.png" alt="キャラクター">
+    <div class="bubble">ジムに行けない日も大丈夫。<br>今日の歩数で1マス進もう！</div>
+    <div class="stepCard">
+      <div class="stepLabel">今日の歩数</div>
+      <div class="stepInputRow"><input id="stepCountInput" type="number" min="0" step="1" inputmode="numeric" placeholder="例：6842" aria-label="今日の歩数"><span>歩</span></div>
+      <div class="stepLabel stepGoalLabel">目標歩数</div>
+      <div class="stepInputRow"><input id="stepGoalInput" type="number" min="1" step="100" inputmode="numeric" aria-label="目標歩数"><span>歩</span></div>
+      <div id="stepStatus" class="stepStatus">歩数を入力すると達成状況が表示されます。</div>
+      <button id="stepAchieveBtn" class="primary" onclick="submitStepChallenge()">歩数を確認する</button>
+    </div>
+    <p class="stepNote">※現在はヘルスケアから自動取得せず、実際の歩数を手入力します。将来のHealthKit連携に差し替えられる構造です。</p>
+  </div>
 </section>
 
 <section id="menu" class="screen">
@@ -175,8 +197,10 @@ const KEY='chokotoreMap_v2';
 const now=new Date();
 const ym=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
 let state=JSON.parse(localStorage.getItem(KEY)||'null');
-if(!state || state.month!==ym){state={month:ym,stamps:0,dates:[],dailyStamps:{},strength:0,tread:0};save();}
+if(!state || state.month!==ym){state={month:ym,stamps:0,dates:[],dailyStamps:{},strength:0,tread:0,stepGoal:8000,stepChallenges:{}};save();}
 if(!state.dailyStamps) state.dailyStamps={};
+if(!state.stepGoal) state.stepGoal=8000;
+if(!state.stepChallenges) state.stepChallenges={};
 let selectedTime=15,menu=[],done=[],currentTread=-1;
 let viewArea=Number.isInteger(state.viewArea)?state.viewArea:Math.min(4,Math.floor(state.stamps/6));
 
@@ -196,6 +220,15 @@ function show(id){
 }
 function selectTime(min){
  selectedTime=min;
+ if(min===0){
+   const goalInput=document.getElementById('stepGoalInput');
+   const countInput=document.getElementById('stepCountInput');
+   if(goalInput) goalInput.value=state.stepGoal||8000;
+   if(countInput) countInput.value='';
+   renderStepChallenge();
+   show('steps');
+   return;
+ }
  menu=base.map(x=>({...x}));
  if(min===10) menu=[base[0],base[2],{...base[3],detail:'4.5km/h・傾斜6%・10分'}];
  if(min===20){menu=[...base.map(x=>({...x}))];menu[3].detail='4.5km/h・傾斜6%・20分';}
@@ -206,6 +239,55 @@ function selectTime(min){
  const sp=document.getElementById('treadSpeed'), inc=document.getElementById('treadIncline'); if(sp)sp.value=4.5; if(inc)inc.value=6;
  renderMenu();renderActive();applyCharacters();show('menu');
 }
+function localDateKey(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
+function renderStepChallenge(){
+ const today=localDateKey();
+ const goal=Number(state.stepGoal)||8000;
+ const rec=state.stepChallenges[today];
+ const goalInput=document.getElementById('stepGoalInput');
+ const status=document.getElementById('stepStatus');
+ const btn=document.getElementById('stepAchieveBtn');
+ if(goalInput) goalInput.value=goal;
+ if(rec?.achieved){
+   if(status) status.innerHTML=`🎉 今日の歩数目標 <b>${goal.toLocaleString()}歩</b>を達成済みです！<br>この日の歩数チャレンジのスタンプは獲得済みです。`;
+   if(btn){btn.textContent='達成済み';btn.disabled=true;}
+ }else{
+   if(status) status.textContent='歩数を入力すると達成状況が表示されます。';
+   if(btn){btn.textContent='歩数を確認する';btn.disabled=false;}
+ }
+ applyCharacters();
+}
+function submitStepChallenge(){
+ const count=Math.floor(Number(document.getElementById('stepCountInput')?.value));
+ const goal=Math.floor(Number(document.getElementById('stepGoalInput')?.value));
+ if(!Number.isFinite(count)||count<0){toast('今日の歩数を入力してください');return;}
+ if(!Number.isFinite(goal)||goal<1){toast('目標歩数は1歩以上で入力してください');return;}
+ state.stepGoal=goal;
+ const today=localDateKey();
+ const existing=state.stepChallenges[today];
+ if(existing?.achieved){renderStepChallenge();return;}
+ state.stepChallenges[today]={count,goal,achieved:count>=goal};
+ save();
+ if(count<goal){
+   const remain=goal-count;
+   document.getElementById('stepStatus').innerHTML=`あと <b>${remain.toLocaleString()}歩</b>で目標達成です。<br>今日の歩数を更新して、もう一度確認できます。`;
+   toast('もう少し！歩数を増やしたら再確認できます');
+   return;
+ }
+ // 0分チャレンジは1日1スタンプ。通常トレーニングの複数回スタンプとは別枠で扱う。
+ if(!state.dates.includes(today)) state.dates.push(today);
+ state.dailyStamps[today]=(state.dailyStamps[today]||0)+1;
+ state.stamps++;
+ state.stepChallenges[today].achieved=true;
+ viewArea=Math.min(4,Math.floor((state.stamps-1)/6));
+ state.viewArea=viewArea;
+ save();
+ document.getElementById('rewardTitle').textContent='スタンプを1個 GET!';
+ document.getElementById('rewardText').innerHTML=`歩数目標 ${goal.toLocaleString()}歩を達成！<br>マップを1マス進みました。`;
+ show('complete');
+ toast('⭐ スタンプを1個獲得しました！');
+}
+
 function renderMenu(){
  const count=menu.length;
  document.getElementById('menuSummary').innerHTML=`<div class="courseHero" style="padding:4px 0 12px"><img class="catMedium" data-char="1" src="assets/cat_lavender.png"><div class="courseSub">約${selectedTime}分 / ${count}メニュー。全部終わるとスタンプを獲得！</div></div>`; applyCharacters();
